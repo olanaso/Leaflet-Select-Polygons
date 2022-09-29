@@ -1,5 +1,4 @@
-/*Style for layers*/
-
+/*default style for layers*/
 var stylelayer = {
     defecto: {
         color: "red",
@@ -24,7 +23,6 @@ var stylelayer = {
         opacity: 0.3,
         weight: 0.5
     }
-
 }
 
 /*Initial map and add layer for mapbox*/
@@ -40,7 +38,7 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
 var placenames = new Array();
 var zipcodes = new Object();
 
-$.each(statesData.features, function(index, feature) {
+$.each(statesData.features, function (index, feature) {
     var name = `${feature.properties.zipcode} ${feature.properties.municipality}  ( ${feature.properties.province} -  ${feature.properties.town})`
     placenames.push(name);
     zipcodes[name] = feature.properties.zipcode;
@@ -49,14 +47,14 @@ $.each(statesData.features, function(index, feature) {
 /* area de busqueda */
 $('#places').typeahead({
     source: placenames,
-    afterSelect: function(b) {
+    afterSelect: function (b) {
         redraw(b)
     }
 });
 
 var arrayBounds = [];
 function redraw(b) {
-    geojson.eachLayer(function(layer) {
+    geojson.eachLayer(function (layer) {
         if (layer.feature.properties.zipcode == zipcodes[b]) {
             selectTypeaheadFeature(layer)
         }
@@ -73,7 +71,7 @@ function onEachFeature(feature, layer) {
         mouseover: highlightFeature,
         mouseout: resetHighlight,
         click: zoomToFeature
-            //dblclick : selectFeature
+        //dblclick : selectFeature
     });
 }
 
@@ -93,15 +91,10 @@ function resetHighlight(e) {
     } else {
         setStyleLayer(layer, stylelayer.defecto)
     }
-    /* Para agregar evento al la capa y mostrar detalles */
-    /* popupLayer.on('mouseout', function(e) {
-                this.closePopup();
-            })*/
 }
 
 var featuresSelected = []
 function zoomToFeature(e) {
-
     var layer = e.target;
     var feature = e.target.feature;
 
@@ -115,26 +108,20 @@ function zoomToFeature(e) {
     }
     map.fitBounds(arrayBounds);
     detailsselected.update(featuresSelected)
-
 }
-
 
 function selectTypeaheadFeature(layer) {
     var layer = layer;
     var feature = layer.feature;
-
     if (checkExistsLayers(feature)) {
         removerlayers(feature, setStyleLayer, layer, stylelayer.defecto)
-
         removeBounds(layer)
-
     } else {
         addLayers(feature, setStyleLayer, layer, stylelayer.highlight)
         addBounds(layer)
     }
     map.fitBounds(arrayBounds.length != 0 ? arrayBounds : initbounds)
     detailsselected.update(featuresSelected)
-
 }
 
 var corner1 = L.latLng(53.62, 2.931),
@@ -174,7 +161,6 @@ function checkExistsLayers(feature) {
             result = true;
             break;
         }
-
     };
     return result
 }
@@ -184,13 +170,13 @@ var info = L.control({
     position: 'bottomleft'
 });
 
-info.onAdd = function(map) {
+info.onAdd = function (map) {
     this._div = L.DomUtil.create('div', 'info');
     this.update();
     return this._div;
 };
 
-info.update = function(properties) {
+info.update = function (properties) {
     this._div.innerHTML =
 
         '<h4>Properties</h4>' + (properties ?
@@ -208,18 +194,17 @@ info.addTo(map);
 
 
 var detailsselected = L.control();
-detailsselected.onAdd = function(map) {
+detailsselected.onAdd = function (map) {
     this._div = L.DomUtil.create('div', 'info scroler');
     this.update();
     return this._div;
 };
 
 
-var detailshow = function() {
+var detailshow = function () {
     var result = ''
     var total = 0
     for (var i = 0; i < featuresSelected.length; i++) {
-
         var properties = featuresSelected[i].feature.properties
         result +=
             `
@@ -239,19 +224,16 @@ var detailshow = function() {
     };
 }
 
-detailsselected.update = function(arrayselected) {
-
+detailsselected.update = function (arrayselected) {
     var details = detailshow()
     this._div.innerHTML = '<b>TOTAL: ' + details.total + '</b><br>' + details.result;
     $('#suma', window.parent.document).val(details.total);
-
-
 };
 
 detailsselected.addTo(map);
 
 function dellayer(zipcode) {
-    geojson.eachLayer(function(layer) {
+    geojson.eachLayer(function (layer) {
         if (layer.feature.properties.zipcode == zipcode) {
             selectTypeaheadFeature(layer)
         }
